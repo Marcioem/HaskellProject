@@ -16,6 +16,13 @@ data Fml a = Or (Fml a) (Fml a)
 
 mkVar = Final . Var.mk
 
+multAnd :: [Fml a] -> Fml a
+multAnd [x] = x
+multAnd (x:xs) = And x (multAnd xs)
+
+multOr :: [Fml a] -> Fml a
+multOr [x] = x
+multOr (x:xs) = Or x (multOr xs)
 
 toCNF :: Fml a -> Fml a
 toCNF (Final a ) = Final a
@@ -29,16 +36,21 @@ toCNF (Not a) = f a
   f (Or b c ) = toCNF( And(Not b) (Not c))
   f (And b c ) = toCNF( Or b c)
 toCNF ( And a b ) = And (toCNF a) (toCNF b)
-toCNF ( Or a b ) = conjonctiveElements[(Or c d) | c <- collectClauses(toCNF a), d <- collectClauses(toCNF b)]
+toCNF ( Or a b ) = multAnd[(Or c d) | c <- collectClauses(toCNF a), d <- collectClauses(toCNF b)]
   where 
   collectClauses (And a b) = collectClauses a ++ collectClauses b
   collectClauses a = [a]
-  conjonctiveElements [x] = x
-  conjonctiveElements (x:xs) = And x (conjonctiveElements xs)
 
-{-
-vars :: Fml a -> [Var.Var a]
--}
+vars :: (Eq a) => Fml a -> [Var.Var a]
+vars = L.nub . go []
+  where
+    go acc (Final v) = v : acc
+    go acc (And p q) = (vars p) ++ (vars q)
+    go acc (Or p q) = (vars p) ++ (vars q)
+    go acc (Not p) = vars p
+    go acc (Imply p q) = (vars p) ++ (vars q)
+    go acc (Equiv p q) = (vars p) ++ (vars q)
+    go acc (XOr p q) = (vars p) ++ (vars q)
 
 prettyPrinter :: (Show a) => Fml a -> String
 prettyPrinter = printer ""
