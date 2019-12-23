@@ -63,4 +63,8 @@ prettyPrinter = printer ""
     printer acc (Equiv p q) = "(" ++ prettyPrinter p ++ "<=>" ++ prettyPrinter q ++ ")"
     printer acc (XOr p q)   = "(" ++ prettyPrinter p ++ "°" ++ prettyPrinter q ++ ")"
 
-
+toShapedFml :: Fml a -> Fml a
+toShapedFml a = multAnd (aux a)
+  where
+    aux (And a b) = aux a ++ aux b
+    aux a = [a]

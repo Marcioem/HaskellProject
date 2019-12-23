@@ -2,15 +2,15 @@ module Data.Algorithm.Sat.Fml.Model where
 
 import qualified Data.Algorithm.Sat.Fml as Fml
 
-subset :: (Eq t, Num t, Ord a) => t -> [Fml.Fml a] -> [[Fml.Fml a]]
-subset 0 [x] = [[x], []]
-subset 0 (x:xs) = map (x:) (subset (0) xs) ++ (subset 0 xs)
-subset 1 [x] = [[x]]
-subset k [x] = []
-subset k (x:xs) = map (x:) (subset (k-1) xs) ++ (subset k xs)
-
 atLeast :: (Eq t, Num t, Ord a) => t -> [Fml.Fml a] -> Fml.Fml a
-atLeast k t = Fml.multOr [Fml.multAnd fs | fs <- subset k t]
+atLeast k xs = Fml.multOr [Fml.multAnd l | let ss = subsets k xs, l <- ss, not (null ss)]
+
+subsets :: (Eq t, Num t, Ord a) => t -> [Fml.Fml a] -> [[Fml.Fml a]]
+subsets 0 [x] = [[x], []]
+subsets 0 (x:xs) = map (x:) (subsets 0 xs) ++ subsets 0 xs
+subsets 1 [x] = [[x]]
+subsets k [x] = []
+subsets k (x:xs) = map (x:) (subsets (k-1) xs) ++ subsets k xs
 
 anyOf :: (Ord a) => [Fml.Fml a] -> Fml.Fml a
 anyOf xs = atLeast 1 xs
