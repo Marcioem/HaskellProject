@@ -12,101 +12,36 @@ import qualified Data.Map as Map
 
 {-
 solve::(Ord a)=> Fml.Fml a-> Maybe(Assignment.Assignment a)
+solve a = solveAux Assignment.mkEmpty (CNFFml.toCNFFml ( Fml.toShapedFml(Fml.toCNF a)))
 
-solve :: CNFFml.CNFFml -> Maybe (Map.Map Var.Var Bool)
-solve = solveAux Map.empty
-
-selectLiteral :: Clause.Clause f -> Lit.Lit l
-selectLiteral f = if (not . Clause.isEmpty) f'
-                   then (L.head . L.head) f'
-                   else CNFFml.mostFrequentLiteral f
+solveAux :: Assignment.Assignment a -> CNFFml.CNFFml a -> Maybe (Assignment.Assignment a)
+solveAux assign [] = Just assign
+solveAux assign fml  = case solveAux' assign fml literal of
+  Just assign'  -> Just assign'
+  Nothing  -> solveAux' assign fml (Lit.neg literal)
   where
-    f' = CNFFml.unitClauses f
+    literal =  selectLiteral fml
 
-reduceFormula :: (Eq a) => Lit.Lit a -> CNFFml.CNFFml a -> CNFFml.CNFFml a
-reduceFormula literal = makeCNFFml . L.filter f . L.map (reduceClause literal) . getClauses
-  where
-    f c = literal `notElem` Clause.getLits c
-
-reduceClause :: (Eq a) => Lit.Lit a -> Clause.Clause a -> Clause.Clause a
-reduceClause literal clause
-  | L.elem (Lit.neg literal) (Clause.getLits clause) = Clause.makeClause (L.filter (not. (\x -> x == Lit.neg(literal))) (Clause.getLits clause))
-  | otherwise = clause
-
-solveAux :: Map.Map Var.Var Bool -> CNFFml.CNFFml -> Maybe (Assignment.Assignment a)
-solveAux m [] = Just m
-solveAux m f  = case solveAux' m f l of
-  Just m'  -> Just m'
-  Nothing  -> solveAux' m f (negate l)
-  where
-    l =  selectLiteral f
-
-solveAux' :: Map.Map Var.Var Bool -> CNFFml.CNFFml -> Lit.Lit -> Maybe (Assignment.Assignment a)
-solveAux' m f l = if CNFFml.hasUnsatisfiedClause f'
-                  then Nothing
-                  else solveAux m' f'
+solveAux' :: Assignment.Assignment a-> CNFFml.CNFFml a -> Lit.Lit a -> Maybe (Assignment.Assignment a)
+solveAux' m f l = if CNFFml.hasUnsatisfiedClause f' then Nothing else solveAux m' f'
   where
     f' = reduceFormula l f
-    m' = Map.insert (abs l) (l > 0) m
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-reduceFormula :: (Eq a) => Lit.Lit a -> CNFFml.CNFFml a -> CNFFml.CNFFml a
-reduceFormula literal = makeCNFFml . L.filter f . L.map (reduceClause literal) . getClauses
-  where
-    f c = literal `notElem` Clause.getLits c
-
-reduceClause :: (Eq a) => Lit.Lit a -> Clause.Clause a -> Clause.Clause a
-reduceClause literal clause
-  | L.elem (Lit.neg literal) (Clause.getLits clause) = Clause.makeClause (L.filter (not. (\x -> x == Lit.neg(literal))) (Clause.getLits clause))
-  | otherwise = clause
-
-
-
-
-
-
-
-
-reduce :: (Eq a, Ord a) => Lit.Lit a -> Clause a -> Clause a
-reduce l = mk . L.filter (/= l') . getLits
-  where
-    l' = Lit.neg l
-
-
--- Reduce a formula according to a literal
-reduce :: (Eq a, Ord a) => Lit.Lit a -> Fml a -> Fml a
-reduce l = mk . L.filter f . L.map (Clause.reduce l) . getClauses
-  where
-    f c = l `notElem` Clause.getLits c
-
-
-
-reduceFormula :: (Eq a) => Lit.Lit a -> CNFFml.CNFFml a -> CNFFml.CNFFml a
-reduceFormula literal = makeCNFFml . L.filter f . L.map (reduceClause literal) . getClauses
-  where
-    f c = literal `notElem` Clause.getLits c
-
-reduceClause :: (Eq a) => Lit.Lit a -> Clause.Clause a -> Clause.Clause a
-reduceClause literal clause
-  | L.elem (Lit.neg literal) (Clause.getLits clause) = Clause.makeClause (L.filter (not. (\x -> x == Lit.neg(literal))) (Clause.getLits clause))
-  | otherwise = clause
+    m' = Assignment.insert l
 -}
+selectLiteral :: (Ord a) => CNFFml.CNFFml a -> Lit.Lit a
+selectLiteral f = if (not . CNFFml.isEmpty) clauses 
+                  then (L.head) (Clause.getLits ( L.head (CNFFml.getClauses clauses)))
+                  else CNFFml.mostFrequentLiteral f
+  where
+    clauses = CNFFml.CNFFml ( CNFFml.unitClauses f )
+
+reduceFormula :: (Eq a, Ord a) => Lit.Lit a -> CNFFml.CNFFml a -> CNFFml.CNFFml a
+reduceFormula literal = CNFFml.makeCNFFml . L.filter funct . L.map (reduceClause literal) . CNFFml.getClauses
+  where
+    funct c = literal `notElem` Clause.getLits c
+
+reduceClause :: (Eq a, Ord a) => Lit.Lit a -> Clause.Clause a -> Clause.Clause a
+reduceClause literal clause
+  | L.elem (Lit.neg literal) (Clause.getLits clause) = Clause.makeClause (L.delete (Lit.neg(literal)) (Clause.getLits clause))
+  | otherwise = clause
+ 

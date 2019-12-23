@@ -44,27 +44,27 @@ toCNF ( Or a b ) = multAnd[(Or c d) | c <- collectClauses(toCNF a), d <- collect
 vars :: (Eq a) => Fml a -> [Var.Var a]
 vars = L.nub . go []
   where
-    go acc (Final v) = v : acc
-    go acc (And p q) = (vars p) ++ (vars q)
-    go acc (Or p q) = (vars p) ++ (vars q)
-    go acc (Not p) = vars p
-    go acc (Imply p q) = (vars p) ++ (vars q)
-    go acc (Equiv p q) = (vars p) ++ (vars q)
-    go acc (XOr p q) = (vars p) ++ (vars q)
+  go acc (Final v) = v : acc
+  go acc (And p q) = (vars p) ++ (vars q)
+  go acc (Or p q) = (vars p) ++ (vars q)
+  go acc (Not p) = vars p
+  go acc (Imply p q) = (vars p) ++ (vars q)
+  go acc (Equiv p q) = (vars p) ++ (vars q)
+  go acc (XOr p q) = (vars p) ++ (vars q)
 
 prettyPrinter :: (Show a) => Fml a -> String
 prettyPrinter = printer ""
   where 
-    printer acc (Final (Var.Var v))  = show v
-    printer acc (And p q)   = "(" ++ prettyPrinter p ++ "." ++ prettyPrinter q ++ ")"
-    printer acc (Or p q)    = "(" ++ prettyPrinter p ++ "+" ++ prettyPrinter q ++ ")"
-    printer acc (Not p)     = "~" ++ prettyPrinter p
-    printer acc (Imply p q) = "(" ++ prettyPrinter p ++ "=>" ++ prettyPrinter q ++ ")"
-    printer acc (Equiv p q) = "(" ++ prettyPrinter p ++ "<=>" ++ prettyPrinter q ++ ")"
-    printer acc (XOr p q)   = "(" ++ prettyPrinter p ++ "°" ++ prettyPrinter q ++ ")"
+  printer acc (Final (Var.Var v))  = show v
+  printer acc (And p q)   = "(" ++ prettyPrinter p ++ "." ++ prettyPrinter q ++ ")"
+  printer acc (Or p q)    = "(" ++ prettyPrinter p ++ "+" ++ prettyPrinter q ++ ")"
+  printer acc (Not p)     = "~" ++ prettyPrinter p
+  printer acc (Imply p q) = "(" ++ prettyPrinter p ++ "=>" ++ prettyPrinter q ++ ")"
+  printer acc (Equiv p q) = "(" ++ prettyPrinter p ++ "<=>" ++ prettyPrinter q ++ ")"
+  printer acc (XOr p q)   = "(" ++ prettyPrinter p ++ "°" ++ prettyPrinter q ++ ")"
 
 toShapedFml :: Fml a -> Fml a
 toShapedFml a = multAnd (aux a)
   where
-    aux (And a b) = aux a ++ aux b
-    aux a = [a]
+  aux (And a b) = aux a ++ aux b
+  aux a = [a]

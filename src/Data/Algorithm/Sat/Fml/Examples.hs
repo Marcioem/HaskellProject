@@ -1,18 +1,18 @@
 module Data.Algorithm.Sat.Fml.Examples
   (
   fml1
-{-, fml2
-, fml3-}
+, fml2
+, fml3
 , fml4
 , fml5
 , fml6
-{-, fml7
+, fml7
 , fml8
 , fml9
 , fml10
 , fml11
 , fml12
-, fml13-}
+, fml13
   ) where
 
 import qualified Data.Algorithm.Sat.Fml       as Fml
@@ -26,14 +26,12 @@ vD = Fml.mkVar 'D'
 vE = Fml.mkVar 'E'
 vF = Fml.mkVar 'F'
 
-
-
 -- C + -(BC)
 fml1 :: Fml.Fml Char
 fml1 = Fml.Or vC (Fml.Not (Fml.And vB vC))
 
 
-{-
+
 -- (-A)(-B)(-A + B)(-B + B)
 fml2 :: Fml.Fml Char
 fml2 = Fml.multAnd [f, g, h]
@@ -49,7 +47,7 @@ fml3 = Fml.multOr [f, g, h]
     f = Fml.And (Fml.Or vA vC) (Fml.Or (Fml.And vA vD) (Fml.And vA (Fml.Not vD)))
     g = Fml.And vA vC
     h = vC
--}
+
 -- (-A)(A + B) + (B + AA)(A + (-B)):
 fml4 :: Fml.Fml Char
 fml4 = Fml.Or f g
@@ -70,8 +68,7 @@ fml6 = Fml.Or f g
   where
     f = Fml.Not (Fml.Not vA)
     g = Fml.Not (Fml.Not (Fml.Not vB))
-{-
--
+
 -- (AB + CD + EF) <=> (AB => (CD <=> EF))
 fml7 :: Fml.Fml Char
 fml7 = Fml.Equiv f g
@@ -124,4 +121,3 @@ fml13 = Fml.multAnd [p1, p2, p3, p4]
     p2 = Fml.And vA (Fml.Not vE)
     p3 = Fml.Imply (Fml.Model.allOf [vA, vB]) (Fml.Model.allOf [vC, vE])
     p4 = Fml.Equiv (Fml.And vA vC) (Fml.multAnd [vB, vE, vF])
--}
