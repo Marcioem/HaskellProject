@@ -13,13 +13,6 @@ module Data.Algorithm.Sat.Fml.Examples
 , fml11
 , fml12
 , fml13
-, fmlSolve1
-, fmlSolve2
-, fmlSolve3
-, fmlSolve4
-, fmlSolve5
-, fmlSolve6
-, fmlSolve7
   ) where
 
 import qualified Data.Algorithm.Sat.Fml       as Fml
@@ -32,29 +25,6 @@ vC = Fml.mkVar 'C'
 vD = Fml.mkVar 'D'
 vE = Fml.mkVar 'E'
 vF = Fml.mkVar 'F'
-
---Les tests made by Adrien
-fmlSolve1 = Fml.Or (Fml.Or (Fml.Not vA) vB) (Fml.Or (Fml.Not vB) vC) 
--- True
-
-fmlSolve2 = Fml.Or (Fml.Or vB (Fml.Not vD)) vE 
---True
-
-fmlSolve3 = Fml.And vA (Fml.Or (Fml.Or (Fml.Not vA) vB) (Fml.Or (Fml.Not vB) vC)) 
---True
-
-fmlSolve4 = Fml.And (Fml.And (Fml.And vA (Fml.Or (Fml.Or (Fml.Not vA) vB) (Fml.Or (Fml.Not vB) vC))) (Fml.Not vA)) (Fml.Or (Fml.Or vB (Fml.Not vD)) vE)
---False
-
-fmlSolve5 = Fml.And (Fml.Or (Fml.Not(vA)) vB) (Fml.And vA (Fml.Not(vB))) 
---False
-
-fmlSolve6 = Fml.And (Fml.Not(vA)) vA 
---False
-
-fmlSolve7 = Fml.And (Fml.Or (Fml.Not(vA)) vB) (Fml.And vA (Fml.Not(vB))) 
---False
-
 
 -- C + -(BC)
 fml1 :: Fml.Fml Char
