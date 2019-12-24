@@ -15,15 +15,23 @@ data Fml a = Or (Fml a) (Fml a)
   deriving (Show, Eq, Ord)
 
 mkVar = Final . Var.mk
-
+{-|
+Fonction qui une liste de formule Fml et qui renvoie une formule qui est la conjonction des formules de la liste.
+-}
 multAnd :: [Fml a] -> Fml a
 multAnd [x] = x
 multAnd (x:xs) = And x (multAnd xs)
 
+{-|
+Fonction qui prends une liste de formule Fml et qui renvoie une formule qui est la conjonction des formules de la liste.
+-}
 multOr :: [Fml a] -> Fml a
 multOr [x] = x
 multOr (x:xs) = Or x (multOr xs)
 
+{-|
+Fonction qui prends une formule Fml et qui renvoie cette formule en format CNF.
+-}
 toCNF :: Fml a -> Fml a
 toCNF (Final a ) = Final a
 toCNF (Imply a b ) = toCNF( Or (Not a) (b) )
@@ -41,6 +49,9 @@ toCNF ( Or a b ) = multAnd[(Or c d) | c <- collectClauses(toCNF a), d <- collect
   collectClauses (And a b) = collectClauses a ++ collectClauses b
   collectClauses a = [a]
 
+{-|
+Fonction qui prends une formule Fml et qui renvoie la liste des var de cette formule.
+-}
 vars :: (Eq a) => Fml a -> [Var.Var a]
 vars = L.nub . go []
   where
@@ -52,6 +63,9 @@ vars = L.nub . go []
   go acc (Equiv p q) = (vars p) ++ (vars q)
   go acc (XOr p q) = (vars p) ++ (vars q)
 
+{-|
+Fonction qui prends une formule Fml et qui renvoie une string qui correspond à son affichage.
+-}
 prettyPrinter :: (Show a) => Fml a -> String
 prettyPrinter = printer ""
   where 
@@ -63,6 +77,9 @@ prettyPrinter = printer ""
   printer acc (Equiv p q) = "(" ++ prettyPrinter p ++ "<=>" ++ prettyPrinter q ++ ")"
   printer acc (XOr p q)   = "(" ++ prettyPrinter p ++ "°" ++ prettyPrinter q ++ ")"
 
+{-|
+Fonction qui prends une formule Fml en format CNF et qui renvoie la formule avec les and à droite.
+-}
 toShapedFml :: Fml a -> Fml a
 toShapedFml a = multAnd (aux a)
   where
