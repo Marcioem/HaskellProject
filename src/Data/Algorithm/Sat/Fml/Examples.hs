@@ -30,8 +30,6 @@ vF = Fml.mkVar 'F'
 fml1 :: Fml.Fml Char
 fml1 = Fml.Or vC (Fml.Not (Fml.And vB vC))
 
-
-
 -- (-A)(-B)(-A + B)(-B + B)
 fml2 :: Fml.Fml Char
 fml2 = Fml.multAnd [f, g, h]

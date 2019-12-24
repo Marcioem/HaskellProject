@@ -8,26 +8,24 @@ import qualified Data.Algorithm.Sat.Solver.CNFFml as CNFFml
 import qualified Data.Algorithm.Sat.Var as Var
 
 import qualified Data.List as L
-import qualified Data.Map as Map
 
-{-
 solve::(Ord a)=> Fml.Fml a-> Maybe(Assignment.Assignment a)
-solve a = solveAux Assignment.mkEmpty (CNFFml.toCNFFml ( Fml.toShapedFml(Fml.toCNF a)))
+solve a = solveStopCase Assignment.mkEmpty (CNFFml.toCNFFml ( Fml.toShapedFml(Fml.toCNF a)))
 
-solveAux :: Assignment.Assignment a -> CNFFml.CNFFml a -> Maybe (Assignment.Assignment a)
-solveAux assign [] = Just assign
-solveAux assign fml  = case solveAux' assign fml literal of
-  Just assign'  -> Just assign'
-  Nothing  -> solveAux' assign fml (Lit.neg literal)
+solveStopCase ::(Ord a) => Assignment.Assignment a -> CNFFml.CNFFml a -> Maybe (Assignment.Assignment a)
+solveStopCase assign fml  = if CNFFml.isSatisfied fml then Just assign else 
+    case solveReduce assign fml literal of
+      Just assignFinal  -> Just assignFinal
+      Nothing  -> solveReduce assign fml (Lit.neg literal)
   where
     literal =  selectLiteral fml
 
-solveAux' :: Assignment.Assignment a-> CNFFml.CNFFml a -> Lit.Lit a -> Maybe (Assignment.Assignment a)
-solveAux' m f l = if CNFFml.hasUnsatisfiedClause f' then Nothing else solveAux m' f'
+solveReduce ::(Ord a) => Assignment.Assignment a-> CNFFml.CNFFml a -> Lit.Lit a -> Maybe (Assignment.Assignment a)
+solveReduce assign fml literal = if CNFFml.hasUnsatisfiedClause fmlReduced then Nothing else solveStopCase assignUpdated fmlReduced
   where
-    f' = reduceFormula l f
-    m' = Assignment.insert l
--}
+    fmlReduced = reduceFormula literal fml
+    assignUpdated = Assignment.insert literal assign
+
 selectLiteral :: (Ord a) => CNFFml.CNFFml a -> Lit.Lit a
 selectLiteral f = if (not . CNFFml.isEmpty) clauses 
                   then (L.head) (Clause.getLits ( L.head (CNFFml.getClauses clauses)))
